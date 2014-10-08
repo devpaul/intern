@@ -118,6 +118,25 @@ define([
 				renderer._dirty = false;
 				renderer.title = 'TITLE';
 				assert.isTrue(renderer.needsRender);
+			},
+
+			'. is removed from the end of a title': function () {
+				var renderer = new RemoteRenderer(mockCharm, 'TEST', 'Chr Ver 2.0.1');
+				assert.strictEqual(renderer.title, 'Chr Ver 2:  ');
+			},
+
+			'environment object is stringified': function () {
+				var env = { browserName: 'internet explorer',
+					platform: 'Linux',
+					version: '10'
+				};
+				var renderer = new RemoteRenderer(mockCharm, 'TEST', env);
+				assert.strictEqual(renderer.title, 'IE *nix 10: ');
+			},
+
+			'empty environment object': function () {
+				var renderer = new RemoteRenderer(mockCharm, 'TEST', {});
+				assert.strictEqual(renderer.title, 'Any:        ');
 			}
 		},
 
