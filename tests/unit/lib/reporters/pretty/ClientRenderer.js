@@ -77,6 +77,7 @@ define([
 				renderer.recordSkipped();
 				renderer.render();
 				assert.strictEqual(mockCharm.write.str, expected);
+				assert.isFalse(renderer.needsRender);
 			}
 		};
 	});

@@ -166,12 +166,14 @@ define([
 				var renderer = new RemoteRenderer(mockCharm, 'UNIT');
 				renderer.render();
 				assert.strictEqual(mockCharm.write.str, '            UNIT Pending\n');
+				assert.isFalse(renderer.needsRender);
 			},
 
 			'renders progress': function () {
 				var renderer = new RemoteRenderer(mockCharm, 'FUNC', 'TITLE', 10);
 				renderer.render();
 				assert.strictEqual(mockCharm.write.str, 'TITLE:      FUNC [/         ] 0/10\n');
+				assert.isFalse(renderer.needsRender);
 			}
 		}
 	});
