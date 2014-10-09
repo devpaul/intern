@@ -12,6 +12,7 @@ define([
 	'./lib/interfaces/object',
 	'./lib/reporters/console',
 	'./lib/reporters/pretty/Results',
+	'dojo/has!host-node?./lib/reporters/pretty/StatusBar',
 	'dojo/has!host-node?./lib/reporters/pretty/RemoteRenderer',
 	'dojo/has!host-node?./lib/reporters/pretty/ClientRenderer',
 	'dojo/has!host-node?./lib/reporters/teamcity',
