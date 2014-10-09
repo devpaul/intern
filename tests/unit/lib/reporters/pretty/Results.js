@@ -185,18 +185,6 @@ define([
 			assert.strictEqual(results.getGroupResult(2), 'skip');
 			assert.strictEqual(results.getGroupResult(3), 'pass');
 			assert.strictEqual(results.getGroupResult(4), 'pass');
-		},
-
-		'.emit#groupStatus': function () {
-			var dfd = this.async();
-			var results = new Results(10, 10);
-
-			results.on('groupStatus', dfd.callback(function (result) {
-				assert.strictEqual(0, result.group);
-				assert.strictEqual('pass', result.result);
-			}));
-
-			results.recordPassed();
 		}
 	});
 });
