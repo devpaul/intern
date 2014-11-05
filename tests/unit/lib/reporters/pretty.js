@@ -1,43 +1,50 @@
 define([
+	'require',
 	'intern!object',
 	'intern/chai!assert',
-	'../../../../lib/reporters/pretty'
-], function (registerSuite, assert, pretty) {
-	function createReport(results, total, type) {
-		var report = new pretty._Report(type);
-		results && results.forEach(function (value) {
-			report.record(value);
-		});
-		total && (report.total = total);
-		return report;
-	}
-
+	'dojo/Deferred'
+], function (require, registerSuite, assert, Deferred) {
 	registerSuite(function () {
-		var mockCharm;
+		var mockCharm, pretty;
+
+		function createReport(results, total, type) {
+			var report = new pretty._Report(type);
+			results && results.forEach(function (value) {
+				report.record(value);
+			});
+			total && (report.total = total);
+			return report;
+		}
 
 		return {
 			name: 'intern/lib/reporters/pretty',
 
 			'beforeEach': function () {
-				mockCharm = {
-					write: function (str) {
-						mockCharm.out += str;
-					},
-					erase: function () {
-					},
-					position: function () {
+				var dfd = new Deferred();
+				// Reset our singleton defined reporter. Intern should already have a handle to a pretty reporter. This
+				// will ensure that our reference is unique.
+				require.undef && require.undef('intern-selftest/lib/reporters/pretty');
+				require([ 'intern-selftest/lib/reporters/pretty' ], function (unitUnderTest) {
+					pretty = unitUnderTest;
+
+					function fluentMockCharmFunc() {
+						return mockCharm;
 					}
-				};
-				mockCharm.out = '';
-				pretty.charm = mockCharm;
-				pretty.total = createReport();
-				pretty.reporters = {};
-				pretty.sessions = [];
-				pretty.log = [];
-				pretty.dimensions = {
-					width: 80,
-					height: 24
-				};
+
+					mockCharm = {
+						write: function (str) {
+							mockCharm.out += str;
+						},
+						erase: fluentMockCharmFunc,
+						position: fluentMockCharmFunc,
+						foreground: fluentMockCharmFunc,
+						display: fluentMockCharmFunc
+					};
+					mockCharm.out = '';
+					pretty.charm = mockCharm;
+					dfd.resolve();
+				});
+				return dfd.promise;
 			},
 
 			'_Report': function () {
@@ -94,7 +101,7 @@ define([
 			'_render': {
 				'empty': function () {
 					pretty._render();
-					assert.equal(mockCharm.out, 'Total: [] 0/0\nPassed: 0  Failed: 0  Skipped: 0\n\n');
+					assert.equal(mockCharm.out, 'Total: Pending\nPassed: 0  Failed: 0  Skipped: 0\n\n');
 				},
 
 				'without logs': function () {
