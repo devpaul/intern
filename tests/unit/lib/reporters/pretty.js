@@ -77,43 +77,6 @@ define([
 				assert.deepEqual(report.getCompressedResults(4), [0, 1, 2]);
 			},
 
-			'_drawProgressBar': (function () {
-				var report;
-
-				return {
-					beforeEach: function () {
-						report = createReport([0, 1, 2, 1, 0]);
-					},
-
-					large: function () {
-						report.total = 100;
-						pretty._drawProgressBar(report, 20, mockCharm);
-						assert.equal(mockCharm.out, '[×         ]   5/100');
-					},
-
-					small: function () {
-						report.total = 10;
-						pretty._drawProgressBar(report, 20, mockCharm);
-						assert.equal(mockCharm.out, '[✓~×~✓     ]  5/10');
-					}
-				};
-			})(),
-
-			'_drawReporter': function () {
-				var report = createReport([0, 1, 2], 10, {
-					browserName: 'chrome',
-					version: '32.0.12'
-				});
-				pretty._drawReporter(report, 80);
-				assert.equal(mockCharm.out, 'Chr 32:   [✓~×       ]  3/10, 1 fail, 1 skip\n');
-			},
-
-			'_drawTotalReporter': function () {
-				var report = createReport([0, 1, 2], 10);
-				pretty._drawTotalReporter(report);
-				assert.equal(mockCharm.out, 'Total: [✓~×       ]  3/10\nPassed: 1   Failed: 1   Skipped: 1\n');
-			},
-			
 			'_render': {
 				'empty': function () {
 					pretty._render();
@@ -125,15 +88,17 @@ define([
 						'Passed: 7   Failed: 1   Skipped: 1\n' +
 						'\n' +
 						'Chr :     [✓✓~       ]  3/10, 1 skip\n' +
-						'Fx  :     [✓✓✓       ]  3/10\n' +
-						'IE  11:   [×✓✓       ]  3/10, 1 fail\n';
+						'Fx  24:   [✓✓✓       ]  3/10\n' +
+						'IE  11:   [×✓✓       ]  3/10, 1 fail\n' +
+						'Unkn:     [     ] 0/5\n';
 					pretty.total = createReport([0, 0, 0, 0, 1, 2, 0, 0, 0], 30);
 					pretty.reporters = {
 						'1': createReport([0, 0, 1], 10, { browserName: 'chrome' }),
-						'2': createReport([0, 0, 0], 10, { browserName: 'firefox' }),
-						'3': createReport([2, 0, 0], 10, { browserName: 'internet explorer', version: '11'})
+						'2': createReport([0, 0, 0], 10, { browserName: 'firefox', version: '24.0.1' }),
+						'3': createReport([2, 0, 0], 10, { browserName: 'internet explorer', version: '11'}),
+						'4': createReport([], 5, { browserName: 'Unknown' })
 					};
-					pretty.sessions = ['1', '2', '3'];
+					pretty.sessions = ['1', '2', '3', '4'];
 					pretty._render();
 					assert.equal(mockCharm.out, expected);
 				},
@@ -153,6 +118,31 @@ define([
 						'line 3',
 						'line 4'
 					];
+					pretty._render();
+					assert.equal(mockCharm.out, expected);
+				},
+
+				'with tunnel status and header': function () {
+					var expected = 'header\n' +
+						'Tunnel: tunnel\n' +
+						'\n' +
+						'Total: [✓✓✓✓✓                         ]  5/30\n' +
+						'Passed: 5   Failed: 0   Skipped: 0\n';
+					pretty.total = createReport([0, 0, 0, 0, 0], 30);
+					pretty.tunnelStatus = 'tunnel';
+					pretty.header = 'header';
+					pretty._render();
+					assert.equal(mockCharm.out, expected);
+				},
+
+				'large progress bar becomes compressed': function () {
+					var expected = 'Total: [×  ]   5/100\n' +
+						'Passed: 2    Failed: 1    Skipped: 2\n';
+					pretty.total = createReport([0, 1, 2, 1, 0], 100);
+					pretty.dimensions = {
+						width: 20,
+						height: 5
+					};
 					pretty._render();
 					assert.equal(mockCharm.out, expected);
 				}
